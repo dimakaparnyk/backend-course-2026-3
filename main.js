@@ -15,3 +15,21 @@ if (!options.input) {
   console.error("Please, specify input file");
   process.exit(1);
 }
+
+// Перевірка існування файлу
+if (!fs.existsSync(options.input)) {
+  console.error("Cannot find input file");
+  process.exit(1);
+}
+
+// Читання файлу через readFileSync
+const rawData = fs.readFileSync(options.input, 'utf-8');
+let flights = [];
+
+try {
+  const lines = rawData.split('\n').filter(line => line.trim() !== '');
+  flights = lines.map(line => JSON.parse(line));
+} catch (error) {
+  console.error("Помилка парсингу JSON:", error.message);
+  process.exit(1);
+}
