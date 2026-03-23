@@ -1,9 +1,19 @@
 const { program } = require('commander');
 const fs = require('fs');
 
+program.configureOutput({
+  writeErr: (str) => {
+    if (str.includes("required option") || str.includes("argument missing")) {
+      process.stderr.write("Please, specify input file\n");
+    } else {
+      process.stderr.write(str);
+    }
+  }
+});
+
 // Налаштовуємо спільні параметри командного рядка
 program
-    .option('-i, --input <path>', 'шлях до файлу для читання')
+    .requiredOption('-i, --input <path>', 'шлях до файлу для читання')
     .option('-o, --output <path>', 'шлях до файлу для запису результату')
     .option('-d, --display', 'вивести результат у консоль')
     .option('--date', 'відображати дату')
@@ -11,12 +21,6 @@ program
 
 program.parse(process.argv);
 const options = program.opts();
-
-// Перевірка обов'язкового параметра
-if (!options.input) {
-  console.error("Please, specify input file");
-  process.exit(1);
-}
 
 // Перевірка існування файлу
 if (!fs.existsSync(options.input)) {
@@ -52,12 +56,10 @@ const resultLines = filteredFlights.map(flight => {
 
 const resultString = resultLines.join('\n');
 
-// Виведення у консоль
 if (options.display) {
   console.log(resultString);
 }
 
-// Запис у файл
 if (options.output) {
   fs.writeFileSync(options.output, resultString, 'utf-8');
 }
